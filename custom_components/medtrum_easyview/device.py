@@ -35,14 +35,14 @@ class MedtrumEasyViewDevice(CoordinatorEntity):
         super().__init__(coordinator)
 
         # Creating unique IDs based on the medtrum easyview user_id.
-        self._attr_unique_id = self.coordinator.data["user_id"]
+        self._attr_unique_id = self.coordinator.data["uid"]
 
         _LOGGER.debug(
             "entity unique id is %s",
             self._attr_unique_id,
         )
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self.coordinator.data["user_id"])},
+            identifiers={(DOMAIN, self.coordinator.data["uid"])},
             name=self.coordinator.data["realname"],
             model=VERSION,
             manufacturer=NAME,

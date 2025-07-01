@@ -101,7 +101,7 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
         super().__init__(coordinator)
         self.uom = unit_of_measurement
         self._attr_unique_id = (
-            f"{self.coordinator.data['uid']}_{self.device_type.value}_{key}"
+            f"{self.coordinator.data['uid']}_{device_type.value}_{key}"
         )
         self._attr_name = name
         self.key = key

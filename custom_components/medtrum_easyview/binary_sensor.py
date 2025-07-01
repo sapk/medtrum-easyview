@@ -67,6 +67,9 @@ class MedtrumEasyViewBinarySensor(MedtrumEasyViewDevice, BinarySensorEntity):
     @property
     def is_on(self) -> bool:
         """Return true if the binary_sensor is on."""
-        return bool(
-            int(self.coordinator.data[self.device_type.value + "_status"][self.key]) > 0
-        )
+        return True
+
+
+#        bool(
+#            int(self.coordinator.data[self.device_type.value + "_status"][self.key]) > 0
+#        )

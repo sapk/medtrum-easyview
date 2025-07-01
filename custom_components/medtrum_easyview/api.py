@@ -70,14 +70,14 @@ class MedtrumEasyViewApiClient:
         )
         _LOGGER.debug(
             "Login status : %s",
-            response_login["error"],
+            response_login,
         )
         if response_login["error"] != 0:
             raise MedtrumEasyViewApiAuthenticationError(  # noqa: TRY003
                 "Invalid credentials",  # noqa: EM101
             )
 
-        self.uid = response_login["uid"]
+        self.uid = str(int(response_login["uid"]))
         self.realname = response_login["realname"]
 
         return self.uid
@@ -115,7 +115,7 @@ class MedtrumEasyViewApiClient:
 
         _LOGGER.debug(
             "Return API Status: %s",
-            response["error"],
+            response,
         )
 
         # API status return 0 if everything goes well.
