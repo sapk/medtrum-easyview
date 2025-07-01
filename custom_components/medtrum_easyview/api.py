@@ -7,7 +7,7 @@ import base64
 import json
 import logging
 import socket
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import (
     Any,
 )
@@ -16,23 +16,25 @@ import aiohttp
 
 from .const import (
     API_TIME_OUT_SECONDS,
-    STATUS_URL,
-    LOGIN_URL,
     APP_TAG,
     CONTENT_TYPE,
+    LOGIN_URL,
+    STATUS_URL,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
 
 class MedtrumEasyViewApiClient:
-    """API class to retrieve medtrum easyview data.
+    """
+    API class to retrieve medtrum easyview data.
 
     Attributes:
         username: of the medtrum easyview account
         password: of the medtrum easyview account
         base_url: For API calls depending on your location
         Session: aiottp object for the open session
+
     """
 
     def __init__(
@@ -51,7 +53,7 @@ class MedtrumEasyViewApiClient:
 
     async def async_login(self) -> Any:
         """Get token from the API."""
-        reponseLogin = await api_wrapper(
+        response_login = await api_wrapper(
             self._session,
             method="post",
             url=self.login_url,
@@ -60,38 +62,44 @@ class MedtrumEasyViewApiClient:
                 "Accept": CONTENT_TYPE,
                 "Content-Type": CONTENT_TYPE,
             },
-            data={"user_name": self._username, "password": self._password, "user_type": "P"},
+            data={
+                "user_name": self._username,
+                "password": self._password,
+                "user_type": "P",
+            },
         )
         _LOGGER.debug(
             "Login status : %s",
-            reponseLogin["status"],
+            response_login["error"],
         )
-        if reponseLogin["status"]==2:
-            raise MedtrumEasyViewApiAuthenticationError(
-                "Invalid credentials",
+        if response_login["error"] != 0:
+            raise MedtrumEasyViewApiAuthenticationError(  # noqa: TRY003
+                "Invalid credentials",  # noqa: EM101
             )
 
-        self.uid = reponseLogin["uid"]
-        self.realname = reponseLogin["realname"]
+        self.uid = response_login["uid"]
+        self.realname = response_login["realname"]
 
         return self.uid
 
     async def async_get_data(self) -> Any:
         """Get data from the API."""
         # Create param with base64 encoded timestamp data for current day
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        end_of_day = start_of_day.replace(hour=23, minute=59, second=59, microsecond=999999)
-        
+        end_of_day = start_of_day.replace(
+            hour=23, minute=59, second=59, microsecond=999999
+        )
+
         param_data = {
-            "ts": [int(start_of_day.timestamp()), int(end_of_day.timestamp())], 
-            "tz": 0 # UTC+0
+            "ts": [int(start_of_day.timestamp()), int(end_of_day.timestamp())],
+            "tz": 0,  # UTC+0
         }
         param_encoded = base64.b64encode(json.dumps(param_data).encode()).decode()
-        
+
         url = self.status_url.replace("$userid", self.uid) + f"?param={param_encoded}"
-        
-        APIreponse = await api_wrapper(
+
+        response = await api_wrapper(
             self._session,
             method="get",
             url=url,
@@ -99,21 +107,20 @@ class MedtrumEasyViewApiClient:
                 "AppTag": APP_TAG,
                 "Accept": CONTENT_TYPE,
                 "Content-Type": CONTENT_TYPE,
-                # "Cookie": self.cookie,
             },
             data={},
         )
 
-        # handle cookie expiration 
+        # handle cookie expiration
 
         _LOGGER.debug(
             "Return API Status: %s",
-            APIreponse["error"],
+            response["error"],
         )
 
         # API status return 0 if everything goes well.
-        # if APIreponse["error"] == 0:
-        data = APIreponse["data"]
+        # if response["error"] == 0:
+        data = response["data"]
 
         # Add uid, realname to the data for later use.
         data["uid"] = self.uid
@@ -125,6 +132,7 @@ class MedtrumEasyViewApiClient:
         )
 
         return data
+
 
 ################################################################
 #            """Utilitises """               #
@@ -150,23 +158,22 @@ async def api_wrapper(
             )
             _LOGGER.debug("response.status: %s", response.status)
             if response.status in (401, 403):
-                raise MedtrumEasyViewApiAuthenticationError(
-                    "Invalid credentials",
+                raise MedtrumEasyViewApiAuthenticationError(  # noqa:TRY003,TRY301
+                    "Invalid credentials",  # noqa: EM101
                 )
             response.raise_for_status()
-            #
             return await response.json()
 
-    except asyncio.TimeoutError as exception:
-        raise MedtrumEasyViewCommunicationErro(
-            "Timeout error fetching information",
+    except TimeoutError as exception:
+        raise MedtrumEasyViewCommunicationError(  # noqa: TRY003
+            "Timeout error fetching information",  # noqa: EM101
         ) from exception
     except (aiohttp.ClientError, socket.gaierror) as exception:
-        raise MedtrumEasyViewCommunicationErro(
-            "Error fetching information",
+        raise MedtrumEasyViewCommunicationError(  # noqa: TRY003
+            "Error fetching information",  # noqa: EM101
         ) from exception
     except Exception as exception:  # pylint: disable=broad-except
-        raise MedtrumEasyViewApiError("Something really wrong happened!") from exception
+        raise MedtrumEasyViewApiError("Something really wrong happened!") from exception  # noqa: TRY003,EM101
 
 
 class MedtrumEasyViewApiError(Exception):
@@ -175,7 +182,7 @@ class MedtrumEasyViewApiError(Exception):
     _LOGGER.debug("Exception: general API error")
 
 
-class MedtrumEasyViewCommunicationErro(MedtrumEasyViewApiError):
+class MedtrumEasyViewCommunicationError(MedtrumEasyViewApiError):
     """Exception to indicate a communication error."""
 
     _LOGGER.debug("Exception: communication error")

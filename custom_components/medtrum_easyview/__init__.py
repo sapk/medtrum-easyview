@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
-from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+if TYPE_CHECKING:
+    from homeassistant.config_entries import ConfigEntry
+    from homeassistant.core import HomeAssistant
 
 from .api import MedtrumEasyViewApiClient
 from .const import BASE_URL_LIST, COUNTRY, DOMAIN
@@ -24,20 +27,18 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up this integration using UI."""
-
     _LOGGER.debug(
-        "Appel de async_setup_entry entry: entry_id= %s, data= %s, user = %s BaseUrl = %s",
+        "async_setup_entry entry: entry_id= %s, data= %s, user= %s BaseUrl= %s",
         entry.entry_id,
         entry.data,
         entry.data[CONF_USERNAME],
-        #        entry.data[CONF_PASSWORD],
         BASE_URL_LIST.get(entry.data[COUNTRY]),
     )
     hass.data.setdefault(DOMAIN, {})
 
-    #    Using the declared API for login based on patient credentials to retreive the bearer Token
+    #    Using the declared API for login based on patient credentials.
 
-    myMedtrumEasyViewLogin = MedtrumEasyViewApiClient(
+    my_medtrum_easyview = MedtrumEasyViewApiClient(
         username=entry.data[CONF_USERNAME],
         password=entry.data[CONF_PASSWORD],
         base_url=BASE_URL_LIST.get(entry.data[COUNTRY]) or BASE_URL_LIST["Global"],
@@ -45,18 +46,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     # Validate credentials
-    await myMedtrumEasyViewLogin.async_login()
+    await my_medtrum_easyview.async_login()
 
-
-    hass.data[DOMAIN][entry.entry_id] = coordinator = MedtrumEasyViewDataUpdateCoordinator(
-        hass=hass,
-        client=myMedtrumEasyViewLogin,
+    hass.data[DOMAIN][entry.entry_id] = coordinator = (
+        MedtrumEasyViewDataUpdateCoordinator(
+            hass=hass,
+            client=my_medtrum_easyview,
+        )
     )
 
     # First poll of the data to be ready for entities initialization
     await coordinator.async_config_entry_first_refresh()
 
-    # Then launch async_setup_entry for our declared entities in sensor.py and binary_sensor.py
+    # Then launch async_setup_entry for our entities in sensor.py and binary_sensor.py
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Reload entry when its updated.

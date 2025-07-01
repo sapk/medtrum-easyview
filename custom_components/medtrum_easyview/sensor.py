@@ -2,26 +2,28 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 import logging
-import time
+from typing import TYPE_CHECKING, Any
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_UNIT_OF_MEASUREMENT
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 
 from .const import (
     DOMAIN,
     GLUCOSE_VALUE_ICON,
-    MG_DL,
-    MMOL_DL_TO_MG_DL,
-    MMOL_L,
     DeviceType,
 )
-from .coordinator import MedtrumEasyViewDataUpdateCoordinator
 from .device import MedtrumEasyViewDevice
+
+if TYPE_CHECKING:
+    from homeassistant.config_entries import ConfigEntry
+    from homeassistant.core import HomeAssistant
+    from homeassistant.helpers.entity_platform import AddEntitiesCallback
+
+    from .coordinator import MedtrumEasyViewDataUpdateCoordinator
 
 # GVS: Tuto pour ajouter des log
 _LOGGER = logging.getLogger(__name__)
@@ -36,33 +38,16 @@ async def async_setup_entry(
     hass: HomeAssistant,
     config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
-):
+) -> None:
     """Set up the sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    # If custom unit of measurement is selectid it is initialized, otherwise MG/DL is used
-    try:
-        custom_unit = config_entry.data[CONF_UNIT_OF_MEASUREMENT]
-    except KeyError:
-        custom_unit = MG_DL
-
     sensors = [
-        # MedtrumEasyViewSensor(
-        #     coordinator,
-        #     "value",  # key
-        #     "Glucose Measurement",  # name
-        #     custom_unit,
-        # ),
-        # MedtrumEasyViewSensor(
-        #     coordinator,
-        #     "sensor",  # key
-        #     "Active Sensor",  # name
-        #     "days",  # uom
-        # ),
         MedtrumEasyViewSensor(
             coordinator,
             DeviceType.PUMP,
             SensorDeviceClass.ENUM,
+            None,
             "status",  # key
             "Pump Status",  # name
             None,
@@ -71,6 +56,7 @@ async def async_setup_entry(
             coordinator,
             DeviceType.PUMP,
             SensorDeviceClass.DURATION,
+            SensorStateClass.MEASUREMENT,
             "remainingTime",  # key
             "Pump Remaining time",  # name
             "min",
@@ -79,6 +65,7 @@ async def async_setup_entry(
             coordinator,
             DeviceType.PUMP,
             SensorDeviceClass.VOLUME_STORAGE,
+            SensorStateClass.MEASUREMENT,
             "remainingDose",  # key
             "Pump Remaining dose",  # name
             "U",
@@ -87,6 +74,7 @@ async def async_setup_entry(
             coordinator,
             DeviceType.PUMP,
             SensorDeviceClass.TIMESTAMP,
+            None,
             "updateTime",  # key
             "Pump Last update",  # name
             None,
@@ -99,60 +87,62 @@ async def async_setup_entry(
 class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
     """MedtrumEasyView Sensor class."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         coordinator: MedtrumEasyViewDataUpdateCoordinator,
-        type: DeviceType,
+        device_type: DeviceType,
         device_class: SensorDeviceClass,
+        state_class: SensorStateClass | None,
         key: str,
         name: str,
-        uom,
+        unit_of_measurement: str | None,
     ) -> None:
         """Initialize the device class."""
         super().__init__(coordinator)
-        self.uom = uom
-        self._attr_unique_id = f"{self.coordinator.data['uid']}_{key}"
+        self.uom = unit_of_measurement
+        self._attr_unique_id = (
+            f"{self.coordinator.data['uid']}_{self.device_type.value}_{key}"
+        )
         self._attr_name = name
         self.key = key
-        self.device_class = device_class
-        self.type = type
+        self.device_type = device_type
+
+        # set parent class attributes
+        self._attr_device_class = device_class
+        self._attr_state_class = state_class
 
     @property
-    def native_value(self):
+    def native_value(self) -> Any:
         """Return the native value of the sensor."""
-
-        result = None
-
         if self.coordinator.data is not None:
-            return self.coordinator.data[self.type.value + "_status"][self.key]
+            return self.coordinator.data[self.device_type.value + "_status"][self.key]
 
         return None
 
     @property
-    def icon(self):
+    def icon(self) -> str:
         """Return the icon for the frontend."""
         return GLUCOSE_VALUE_ICON
 
     @property
-    def unit_of_measurement(self):
-        """Only used for glucose measurement and medtrum easyview sensor delay since update."""
-
+    def unit_of_measurement(self) -> str | None:
+        """Used for glucose measurement and medtrum easyview sensor."""
         return self.uom
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> Any:
         """Return the state attributes of the medtrum easyview sensor."""
-        result = None
-        if self.coordinator.data:
-            if self.key == "status":
-                if self.coordinator.data[self.type.value + "_status"] is not None:
-                    result = {
-                        "Serial number": hex(
-                            self.coordinator.data[self.type.value + "_status"]["serial"]
-                        )[2:].upper(),
-                        "User ID": self.coordinator.data["uid"],
-                        "Patient": self.coordinator.data["realname"],
-                    }
+        if (
+            self.coordinator.data
+            and self.key == "status"
+            and self.coordinator.data[self.device_type.value + "_status"] is not None
+        ):
+            return {
+                "Serial number": hex(
+                    self.coordinator.data[self.device_type.value + "_status"]["serial"]
+                )[2:].upper(),
+                "User ID": self.coordinator.data["uid"],
+                "Patient": self.coordinator.data["realname"],
+            }
 
-            return result
-        return result
+        return None

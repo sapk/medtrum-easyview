@@ -5,17 +5,16 @@ from __future__ import annotations
 import logging
 
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.const import CONF_PASSWORD, CONF_UNIT_OF_MEASUREMENT, CONF_USERNAME
-from homeassistant.helpers import config_validation as cv, selector
+from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
 from .api import (
     MedtrumEasyViewApiAuthenticationError,
-    MedtrumEasyViewCommunicationErro,
-    MedtrumEasyViewApiError,
     MedtrumEasyViewApiClient,
+    MedtrumEasyViewApiError,
+    MedtrumEasyViewCommunicationError,
 )
 from .const import BASE_URL_LIST, COUNTRY, COUNTRY_LIST, DOMAIN, LOGGER, MG_DL, MMOL_L
 
@@ -39,12 +38,13 @@ class MedtrumEasyViewFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 await self._test_credentials(
                     username=user_input[CONF_USERNAME],
                     password=user_input[CONF_PASSWORD],
-                    base_url=BASE_URL_LIST.get(user_input[COUNTRY]) or BASE_URL_LIST["Global"],
+                    base_url=BASE_URL_LIST.get(user_input[COUNTRY])
+                    or BASE_URL_LIST["Global"],
                 )
             except MedtrumEasyViewApiAuthenticationError as exception:
                 LOGGER.warning(exception)
                 _errors["base"] = "auth"
-            except MedtrumEasyViewCommunicationErro as exception:
+            except MedtrumEasyViewCommunicationError as exception:
                 LOGGER.error(exception)
                 _errors["base"] = "connection"
             except MedtrumEasyViewApiError as exception:
@@ -99,4 +99,3 @@ class MedtrumEasyViewFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
         await client.async_login()
-

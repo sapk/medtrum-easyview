@@ -14,8 +14,7 @@ STATUS_URL = "/api/v2.1/monitor/$userid/status"
 APP_TAG = "v=3.0.2(15);n=eyvw"
 COUNTRY = "Country"
 COUNTRY_LIST = [
-    "Global"
-    "Europe",
+    "GlobalEurope",
     "France",
 ]
 BASE_URL_LIST = {
@@ -34,6 +33,6 @@ API_TIME_OUT_SECONDS = 20
 
 class DeviceType(StrEnum):
     """Device type enum."""
-    
+
     PUMP = "pump"
     SENSOR = "sensor"

@@ -2,16 +2,23 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
 import logging
+from datetime import timedelta
+from typing import TYPE_CHECKING, Any
 
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api import MedtrumEasyViewApiAuthenticationError, MedtrumEasyViewApiClient, MedtrumEasyViewApiError
+from .api import (
+    MedtrumEasyViewApiAuthenticationError,
+    MedtrumEasyViewApiClient,
+    MedtrumEasyViewApiError,
+)
 from .const import DOMAIN, LOGGER, REFRESH_RATE_MIN
+
+if TYPE_CHECKING:
+    from homeassistant.config_entries import ConfigEntry
+    from homeassistant.core import HomeAssistant
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,7 +43,7 @@ class MedtrumEasyViewDataUpdateCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(minutes=REFRESH_RATE_MIN),
         )
 
-    async def _async_update_data(self):
+    async def _async_update_data(self) -> dict[str, Any]:
         """Update data via library."""
         try:
             return await self.client.async_get_data()
