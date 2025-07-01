@@ -1,0 +1,22 @@
+{
+  "title": "Medtrum EasyView intégration",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Entrez votre mail et mot de passe",
+        "description": "Documentation: https://github.com/sapk/medtrum-easyview",
+        "data": {
+          "username": "Mail utilisateur",
+          "password": "Mot de passe",
+          "Country": "Sélectionnez votre région",
+          "unit_of_measurement": "Unité pour la mesure de glucose"
+        }
+      }
+    },
+    "error": {
+      "auth": "Mail/Mot de passe est incorrect.",
+      "connection": "Impossible de se connecter au serveur.",
+      "unknown": "Une erreur inconnue est survenue."
+    }
+  }
+}

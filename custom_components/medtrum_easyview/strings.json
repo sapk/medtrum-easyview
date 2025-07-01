@@ -1,0 +1,25 @@
+{
+  "title": "Medtrum EasyView integration",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Enter your mail and password",
+        "description": "Documentation: https://github.com/sapk/medtrum-easyview",
+        "data": {
+          "username": "Mail",
+          "password": "Password",
+          "Country": "Select your region",
+          "unit_of_measurement": "Unit for glucose measurement"
+        }
+      }
+    },
+    "error": {
+      "auth": "Username/Password is wrong.",
+      "connection": "Unable to connect to the server.",
+      "unknown": "Unknown error occurred."
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  }
+}
