@@ -26,6 +26,9 @@ Platform | Description
 `binary_sensor` | Show binary states from Medtrum EasyView API.
 - Basal Active
 - Pump (connectivity status)
+    - Serial number: The serial number of the device (in hexadecimal, uppercase)
+    - User ID: The Medtrum EasyView user ID
+    - Patient: The patient name associated with the account
 - Sensor (connectivity status)
 
 ## Installation
