@@ -118,11 +118,7 @@ class MedtrumEasyViewBinarySensor(MedtrumEasyViewDevice, BinarySensorEntity):
     @property
     def extra_state_attributes(self) -> Any:
         """Return the state attributes of the medtrum easyview sensor."""
-        if (
-            self.coordinator.data
-            and self.key == "status"
-            and self.coordinator.data[self.device_type.value + "_status"] is not None
-        ):
+        if self.coordinator.data and self.key == "status" and self.is_on:
             return {
                 "Serial number": hex(
                     self.coordinator.data[self.device_type.value + "_status"]["serial"]
