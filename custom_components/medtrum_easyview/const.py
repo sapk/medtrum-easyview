@@ -26,7 +26,7 @@ CONTENT_TYPE = "application/json"
 MMOL_L = "mmol/L"
 MG_DL = "mg/dL"
 MMOL_DL_TO_MG_DL = 18
-REFRESH_RATE_MIN = 5
+REFRESH_RATE_MIN = 1
 API_TIME_OUT_SECONDS = 20
 
 # Icons
