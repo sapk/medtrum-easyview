@@ -1,6 +1,5 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
-[![Validate with Hassfest](https://github.com/sapk/medtrum-easyview/actions/workflows/validate.yml/badge.svg)](https://github.com/sapk/medtrum-easyview/actions/workflows/validate.yml)
-[![Validate with HACS](https://github.com/sapk/medtrum-easyview/actions/workflows/validate.yml/badge.svg)](https://github.com/sapk/medtrum-easyview/actions/workflows/validate.yml)
+[![Validate with Hassfest/HACS](https://github.com/sapk/medtrum-easyview/actions/workflows/validate.yml/badge.svg)](https://github.com/sapk/medtrum-easyview/actions/workflows/validate.yml)
 
 # Medtrum EasyView Integration for Home Assistant 
 
