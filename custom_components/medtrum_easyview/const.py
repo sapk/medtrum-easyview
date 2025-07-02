@@ -53,4 +53,35 @@ class DeviceType(StrEnum):
 class PumpStatus(IntEnum):
     """Pump status enum."""
 
+    # From state2 array in the JS code
     DELIVERING_BASAL = 32
+    DELIVERING_BASAL_ALT = 33  # Second "Delivering Basal" entry
+
+    # From state3 array (64-79 range)
+    LOW_SUSPEND = 64
+    PREDICTIVE_LOW_SUSPEND = 65
+    AUTO_OFF = 66
+    EXCEEDS_MAX_1_HOUR_DELIVERY = 67
+    EXCEEDS_MAX_TDD = 68
+    SUSPEND = 69
+
+    # From state4 array (96-103 range)
+    OCCLUSION_DETECTED = 96
+    PATCH_EXPIRED = 97
+    EMPTY_RESERVOIR = 98
+    PATCH_ERROR_1 = 99
+    PATCH_ERROR_2 = 100
+    PUMP_BASE_ERROR = 101
+    PATCH_BATTERY_DEPLETED = 102
+    MAGNETIC_SENSOR_NOT_CALIBRATED = 103
+
+    # From state1 array (0-6 range)
+    TO_BE_FILLED = 1
+    FILLED_WITH_INSULIN = 2
+    PRIMING = 3
+    PRIMING_COMPLETED = 4
+    INSERTING_NEEDLE = 5
+    PATCH_ACTIVATED = 6
+
+    # Special states
+    DELIVERY_STOPPED = 128
