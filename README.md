@@ -1,7 +1,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 [![Validate with Hassfest/HACS](https://github.com/sapk/medtrum-easyview/actions/workflows/validate.yml/badge.svg)](https://github.com/sapk/medtrum-easyview/actions/workflows/validate.yml)
 
-# Medtrum EasyView Integration for Home Assistant 
+# Medtrum EasyView Integration for Home Assistant
 
 [integration_medtrum-easyview]: https://github.com/sapk/medtrum-easyview.git
 
@@ -11,19 +11,22 @@ Platform | Description
 -- | --
 
 `sensor` | Show info from Medtrum EasyView API.
-- Pump base SN
-- Reservoir SN
-- Reservoir Start Time
-- Reservoir End Time
-- Insulin left (U)
-- Active insuline (U)
-- Basal (U/H)
-- Last bolus volume (U)
-- Last bolus timestamp
-- Last glucose measurement (in mg/dL)
-- Last update
-- Daily basal (U)
-- Daily bolus (U)
+- Pump Status
+- Pump Remaining time
+- Pump Remaining dose
+- Pump Last update
+- Blood Glucose Target
+- Basal Daily Volume
+- Bolus Daily Volume
+- Basal Rate
+- Last Bolus Delivered Time
+- Last Bolus Delivered Volume
+- Active Insulin
+
+`binary_sensor` | Show binary states from Medtrum EasyView API.
+- Basal Active
+- Pump (connectivity status)
+- Sensor (connectivity status)
 
 ## Installation
 

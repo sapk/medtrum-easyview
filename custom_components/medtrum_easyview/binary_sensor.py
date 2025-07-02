@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
@@ -114,3 +114,21 @@ class MedtrumEasyViewBinarySensor(MedtrumEasyViewDevice, BinarySensorEntity):
             )
         except KeyError:
             return False
+
+    @property
+    def extra_state_attributes(self) -> Any:
+        """Return the state attributes of the medtrum easyview sensor."""
+        if (
+            self.coordinator.data
+            and self.key == "status"
+            and self.coordinator.data[self.device_type.value + "_status"] is not None
+        ):
+            return {
+                "Serial number": hex(
+                    self.coordinator.data[self.device_type.value + "_status"]["serial"]
+                )[2:].upper(),
+                "User ID": self.coordinator.data["uid"],
+                "Patient": self.coordinator.data["realname"],
+            }
+
+        return None

@@ -267,21 +267,3 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
     def native_unit_of_measurement(self) -> str | None:
         """Return the native unit of measurement."""
         return self.uom
-
-    @property
-    def extra_state_attributes(self) -> Any:
-        """Return the state attributes of the medtrum easyview sensor."""
-        if (
-            self.coordinator.data
-            and self.key == "status"
-            and self.coordinator.data[self.device_type.value + "_status"] is not None
-        ):
-            return {
-                "Serial number": hex(
-                    self.coordinator.data[self.device_type.value + "_status"]["serial"]
-                )[2:].upper(),
-                "User ID": self.coordinator.data["uid"],
-                "Patient": self.coordinator.data["realname"],
-            }
-
-        return None
