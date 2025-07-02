@@ -68,6 +68,7 @@ async def async_setup_entry(
             None,
             "status",  # key
             "Pump Status",  # name
+            PUMP_ICON,
             None,
             None,
         ),
@@ -78,6 +79,7 @@ async def async_setup_entry(
             SensorStateClass.MEASUREMENT,
             "remainingTime",  # key
             "Pump Remaining time",  # name
+            REMAINING_TIME_ICON,
             "min",
             "d",
         ),
@@ -88,6 +90,7 @@ async def async_setup_entry(
             SensorStateClass.MEASUREMENT,
             "remainingDose",  # key
             "Pump Remaining dose",  # name
+            VOLUME_ICON,
             "U",
             None,
         ),
@@ -98,6 +101,7 @@ async def async_setup_entry(
             None,
             "updateTime",  # key
             "Pump Last update",  # name
+            CLOCK_ICON,
             None,
             None,
         ),
@@ -108,6 +112,7 @@ async def async_setup_entry(
             None,
             "bGTarget",  # key
             "Blood Glucose Target",  # name
+            GLUCOSE_VALUE_ICON,
             custom_unit,
             None,
         ),
@@ -118,6 +123,7 @@ async def async_setup_entry(
             SensorStateClass.TOTAL_INCREASING,
             "basalSum",  # key
             "Basal Daily Volume",  # name
+            BASAL_ICON,
             "U",
             None,
         ),
@@ -128,6 +134,7 @@ async def async_setup_entry(
             SensorStateClass.TOTAL_INCREASING,
             "bolusSum",  # key
             "Bolus Daily Volume",  # name
+            BOLUS_ICON,
             "U",
             None,
         ),
@@ -138,6 +145,7 @@ async def async_setup_entry(
             SensorStateClass.MEASUREMENT,
             "basalRate",  # key
             "Basal Rate",  # name
+            BASAL_ICON,
             "U/h",
             None,
         ),
@@ -148,6 +156,7 @@ async def async_setup_entry(
             None,
             "bolusDeliveriedTime",  # key
             "Last Bolus Delivered Time",  # name
+            TIMELINE_ICON,
             None,
             None,
         ),
@@ -158,6 +167,7 @@ async def async_setup_entry(
             SensorStateClass.MEASUREMENT,
             "bolusDeliveried",  # key
             "Last Bolus Delivered Volume",  # name
+            BOLUS_ICON,
             "U",  # Insulin units
             None,
         ),
@@ -168,6 +178,7 @@ async def async_setup_entry(
             SensorStateClass.MEASUREMENT,
             "iob",  # key
             "Active Insulin",  # name
+            VOLUME_ICON,
             "U",  # Insulin units
             None,
         ),
@@ -187,6 +198,7 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
         state_class: SensorStateClass | None,
         key: str,
         name: str,
+        icon: str | None,
         unit_of_measurement: str | None,
         suggested_unit_of_measurement: str | None,
     ) -> None:
@@ -198,6 +210,7 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
         )
         self._attr_name = name
         self.key = key
+        self._icon = icon
         self.device_type = device_type
 
         # set parent class attributes
@@ -237,24 +250,11 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
     @property
     def icon(self) -> str | None:
         """Return the icon for the frontend."""
-        # Blood glucose target
-        if self.key == "bGTarget":
-            return GLUCOSE_VALUE_ICON
-
-        # Timestamp sensors
-        if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
-            return TIMELINE_ICON if self.key == "bolusDeliveriedTime" else CLOCK_ICON
+        if self._icon:
+            return self._icon
 
         # Pump sensors
         if self.device_type == DeviceType.PUMP:
-            if self.key in ["basalSum", "basalRate"]:
-                return BASAL_ICON
-            if self.key in ["bolusSum", "bolusDeliveried"]:
-                return BOLUS_ICON
-            if self.key == "remainingTime":
-                return REMAINING_TIME_ICON
-            if self.uom == "U":
-                return VOLUME_ICON
             return PUMP_ICON
 
         # Sensor sensors
