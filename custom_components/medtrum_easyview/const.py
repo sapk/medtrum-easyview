@@ -1,6 +1,6 @@
 """Constants for Medtrum EasyView."""
 
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from logging import Logger, getLogger
 
 LOGGER: Logger = getLogger(__package__)
@@ -48,3 +48,9 @@ class DeviceType(StrEnum):
 
     PUMP = "pump"
     SENSOR = "sensor"
+
+
+class PumpStatus(IntEnum):
+    """Pump status enum."""
+
+    DELIVERING_BASAL = 32

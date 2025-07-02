@@ -26,6 +26,7 @@ from .const import (
     TIMELINE_ICON,
     MG_DL,
     DeviceType,
+    PumpStatus,
 )
 from .device import MedtrumEasyViewDevice
 
@@ -218,6 +219,17 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
                 and value is not None
             ):
                 return datetime.fromtimestamp(value, tz=UTC)
+
+            # Convert pump status integer to string for ENUM device class
+            if (
+                self._attr_device_class == SensorDeviceClass.ENUM
+                and self.key == "status"
+                and value is not None
+            ):
+                try:
+                    return PumpStatus(value).name.replace("_", " ").title()
+                except ValueError:
+                    return f"Unknown Status ({value})"
 
             return value
 
