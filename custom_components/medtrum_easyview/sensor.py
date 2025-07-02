@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.components.sensor import (
@@ -64,7 +65,7 @@ async def async_setup_entry(
         MedtrumEasyViewSensor(
             coordinator,
             DeviceType.PUMP,
-            SensorDeviceClass.VOLUME_STORAGE,
+            None,
             SensorStateClass.MEASUREMENT,
             "remainingDose",  # key
             "Pump Remaining dose",  # name
@@ -91,7 +92,7 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
         self,
         coordinator: MedtrumEasyViewDataUpdateCoordinator,
         device_type: DeviceType,
-        device_class: SensorDeviceClass,
+        device_class: SensorDeviceClass | None,
         state_class: SensorStateClass | None,
         key: str,
         name: str,
@@ -115,7 +116,16 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
     def native_value(self) -> Any:
         """Return the native value of the sensor."""
         if self.coordinator.data is not None:
-            return self.coordinator.data[self.device_type.value + "_status"][self.key]
+            value = self.coordinator.data[self.device_type.value + "_status"][self.key]
+
+            # Convert timestamp to datetime for TIMESTAMP device class
+            if (
+                self._attr_device_class == SensorDeviceClass.TIMESTAMP
+                and value is not None
+            ):
+                return datetime.fromtimestamp(value, tz=UTC)
+
+            return value
 
         return None
 
@@ -125,8 +135,8 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
         return GLUCOSE_VALUE_ICON
 
     @property
-    def unit_of_measurement(self) -> str | None:
-        """Used for glucose measurement and medtrum easyview sensor."""
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the native unit of measurement."""
         return self.uom
 
     @property
