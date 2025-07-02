@@ -6,6 +6,7 @@ import logging
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
+from homeassistant.const import CONF_UNIT_OF_MEASUREMENT
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
@@ -15,9 +16,11 @@ from homeassistant.components.sensor import (
 from .const import (
     DOMAIN,
     GLUCOSE_VALUE_ICON,
+    MG_DL,
     DeviceType,
 )
 from .device import MedtrumEasyViewDevice
+
 
 if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
@@ -42,6 +45,12 @@ async def async_setup_entry(
 ) -> None:
     """Set up the sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
+
+    # If custom unit of measurement is selectid it is initialized, otherwise MG/DL is used
+    try:
+        custom_unit = config_entry.data[CONF_UNIT_OF_MEASUREMENT]
+    except KeyError:
+        custom_unit = MG_DL
 
     sensors = [
         MedtrumEasyViewSensor(
@@ -79,6 +88,69 @@ async def async_setup_entry(
             "updateTime",  # key
             "Pump Last update",  # name
             None,
+        ),
+        MedtrumEasyViewSensor(
+            coordinator,
+            DeviceType.PUMP,
+            SensorDeviceClass.BLOOD_GLUCOSE_CONCENTRATION,
+            None,
+            "bGTarget",  # key
+            "Blood Glucose Target",  # name
+            custom_unit,
+        ),
+        MedtrumEasyViewSensor(
+            coordinator,
+            DeviceType.PUMP,
+            None,
+            SensorStateClass.TOTAL_INCREASING,
+            "basalSum",  # key
+            "Basal Daily Volume",  # name
+            "U",
+        ),
+        MedtrumEasyViewSensor(
+            coordinator,
+            DeviceType.PUMP,
+            None,
+            SensorStateClass.TOTAL_INCREASING,
+            "bolusSum",  # key
+            "Bolus Daily Volume",  # name
+            "U",
+        ),
+        MedtrumEasyViewSensor(
+            coordinator,
+            DeviceType.PUMP,
+            None,
+            SensorStateClass.MEASUREMENT,
+            "basalRate",  # key
+            "Basal Rate",  # name
+            "U/h",
+        ),
+        MedtrumEasyViewSensor(
+            coordinator,
+            DeviceType.PUMP,
+            SensorDeviceClass.TIMESTAMP,
+            None,
+            "bolusDeliveriedTime",  # key
+            "Bolus Delivered Time",  # name
+            None,
+        ),
+        MedtrumEasyViewSensor(
+            coordinator,
+            DeviceType.PUMP,
+            None,
+            SensorStateClass.MEASUREMENT,
+            "bolusDeliveried",  # key
+            "Bolus Delivered Volume",  # name
+            "U",  # Insulin units
+        ),
+        MedtrumEasyViewSensor(
+            coordinator,
+            DeviceType.PUMP,
+            None,
+            SensorStateClass.MEASUREMENT,
+            "iob",  # key
+            "Active Insulin",  # name
+            "U",  # Insulin units
         ),
     ]
 
