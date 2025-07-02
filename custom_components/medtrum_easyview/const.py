@@ -23,12 +23,24 @@ BASE_URL_LIST = {
     "France": "https://easyview.medtrum.fr",
 }
 CONTENT_TYPE = "application/json"
-GLUCOSE_VALUE_ICON = "mdi:diabetes"
 MMOL_L = "mmol/L"
 MG_DL = "mg/dL"
 MMOL_DL_TO_MG_DL = 18
 REFRESH_RATE_MIN = 5
 API_TIME_OUT_SECONDS = 20
+
+# Icons
+GLUCOSE_VALUE_ICON = "mdi:diabetes"
+PUMP_ICON = "mdi:needle"
+PUMP_ON_ICON = "mdi:water-sync"
+PUMP_OFF_ICON = "mdi:water-off"
+SENSOR_ICON = "mdi:diabetes"
+CLOCK_ICON = "mdi:clock"
+TIMELINE_ICON = "mdi:timeline-clock"
+BASAL_ICON = "mdi:water-sync"
+BOLUS_ICON = "mdi:water-plus"
+VOLUME_ICON = "mdi:gauge"
+REMAINING_TIME_ICON = "mdi:clock-end"
 
 
 class DeviceType(StrEnum):

@@ -15,7 +15,15 @@ from homeassistant.components.sensor import (
 
 from .const import (
     DOMAIN,
+    PUMP_ICON,
+    SENSOR_ICON,
+    CLOCK_ICON,
+    BASAL_ICON,
+    BOLUS_ICON,
+    VOLUME_ICON,
     GLUCOSE_VALUE_ICON,
+    REMAINING_TIME_ICON,
+    TIMELINE_ICON,
     MG_DL,
     DeviceType,
 )
@@ -61,6 +69,7 @@ async def async_setup_entry(
             "status",  # key
             "Pump Status",  # name
             None,
+            None,
         ),
         MedtrumEasyViewSensor(
             coordinator,
@@ -70,6 +79,7 @@ async def async_setup_entry(
             "remainingTime",  # key
             "Pump Remaining time",  # name
             "min",
+            "d",
         ),
         MedtrumEasyViewSensor(
             coordinator,
@@ -79,6 +89,7 @@ async def async_setup_entry(
             "remainingDose",  # key
             "Pump Remaining dose",  # name
             "U",
+            None,
         ),
         MedtrumEasyViewSensor(
             coordinator,
@@ -87,6 +98,7 @@ async def async_setup_entry(
             None,
             "updateTime",  # key
             "Pump Last update",  # name
+            None,
             None,
         ),
         MedtrumEasyViewSensor(
@@ -97,6 +109,7 @@ async def async_setup_entry(
             "bGTarget",  # key
             "Blood Glucose Target",  # name
             custom_unit,
+            None,
         ),
         MedtrumEasyViewSensor(
             coordinator,
@@ -106,6 +119,7 @@ async def async_setup_entry(
             "basalSum",  # key
             "Basal Daily Volume",  # name
             "U",
+            None,
         ),
         MedtrumEasyViewSensor(
             coordinator,
@@ -115,6 +129,7 @@ async def async_setup_entry(
             "bolusSum",  # key
             "Bolus Daily Volume",  # name
             "U",
+            None,
         ),
         MedtrumEasyViewSensor(
             coordinator,
@@ -124,6 +139,7 @@ async def async_setup_entry(
             "basalRate",  # key
             "Basal Rate",  # name
             "U/h",
+            None,
         ),
         MedtrumEasyViewSensor(
             coordinator,
@@ -131,7 +147,8 @@ async def async_setup_entry(
             SensorDeviceClass.TIMESTAMP,
             None,
             "bolusDeliveriedTime",  # key
-            "Bolus Delivered Time",  # name
+            "Last Bolus Delivered Time",  # name
+            None,
             None,
         ),
         MedtrumEasyViewSensor(
@@ -140,8 +157,9 @@ async def async_setup_entry(
             None,
             SensorStateClass.MEASUREMENT,
             "bolusDeliveried",  # key
-            "Bolus Delivered Volume",  # name
+            "Last Bolus Delivered Volume",  # name
             "U",  # Insulin units
+            None,
         ),
         MedtrumEasyViewSensor(
             coordinator,
@@ -151,6 +169,7 @@ async def async_setup_entry(
             "iob",  # key
             "Active Insulin",  # name
             "U",  # Insulin units
+            None,
         ),
     ]
 
@@ -169,6 +188,7 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
         key: str,
         name: str,
         unit_of_measurement: str | None,
+        suggested_unit_of_measurement: str | None,
     ) -> None:
         """Initialize the device class."""
         super().__init__(coordinator)
@@ -183,6 +203,8 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
         # set parent class attributes
         self._attr_device_class = device_class
         self._attr_state_class = state_class
+        self._attr_suggested_unit_of_measurement = suggested_unit_of_measurement
+        self._attr_suggested_display_precision = 2
 
     @property
     def native_value(self) -> Any:
@@ -202,9 +224,27 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
         return None
 
     @property
-    def icon(self) -> str:
+    def icon(self) -> str | None:
         """Return the icon for the frontend."""
-        return GLUCOSE_VALUE_ICON
+        if self.key == "bGTarget":
+            return GLUCOSE_VALUE_ICON
+        if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
+            if self.key == "bolusDeliveriedTime":
+                return TIMELINE_ICON
+            return CLOCK_ICON
+        if self.device_type == DeviceType.PUMP:
+            if self.key in ["basalSum", "basalRate"]:
+                return BASAL_ICON
+            if self.key in ["bolusSum", "bolusDeliveried"]:
+                return BOLUS_ICON
+            if self.key == "remainingTime":
+                return REMAINING_TIME_ICON
+            if self.uom == "U":
+                return VOLUME_ICON
+            return PUMP_ICON
+        if self.device_type == DeviceType.SENSOR:
+            return SENSOR_ICON
+        return None
 
     @property
     def native_unit_of_measurement(self) -> str | None:
