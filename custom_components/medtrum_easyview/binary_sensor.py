@@ -13,8 +13,8 @@ from homeassistant.components.binary_sensor import (
 from .const import (
     DOMAIN,
     PUMP_ICON,
-    PUMP_ON_ICON,
     PUMP_OFF_ICON,
+    PUMP_ON_ICON,
     SENSOR_ICON,
     DeviceType,
 )

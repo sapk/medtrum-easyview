@@ -6,30 +6,29 @@ import logging
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from homeassistant.const import CONF_UNIT_OF_MEASUREMENT
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
     SensorStateClass,
 )
+from homeassistant.const import CONF_UNIT_OF_MEASUREMENT
 
 from .const import (
-    DOMAIN,
-    PUMP_ICON,
-    SENSOR_ICON,
-    CLOCK_ICON,
     BASAL_ICON,
     BOLUS_ICON,
-    VOLUME_ICON,
+    CLOCK_ICON,
+    DOMAIN,
     GLUCOSE_VALUE_ICON,
-    REMAINING_TIME_ICON,
-    TIMELINE_ICON,
     MG_DL,
+    PUMP_ICON,
+    REMAINING_TIME_ICON,
+    SENSOR_ICON,
+    TIMELINE_ICON,
+    VOLUME_ICON,
     DeviceType,
     PumpStatus,
 )
 from .device import MedtrumEasyViewDevice
-
 
 if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
@@ -55,7 +54,7 @@ async def async_setup_entry(
     """Set up the sensor platform."""
     coordinator = hass.data[DOMAIN][config_entry.entry_id]
 
-    # If custom unit of measurement is selectid it is initialized, otherwise MG/DL is used
+    # If custom unit of measurement is selected, otherwise MG/DL is used
     try:
         custom_unit = config_entry.data[CONF_UNIT_OF_MEASUREMENT]
     except KeyError:
@@ -238,12 +237,15 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
     @property
     def icon(self) -> str | None:
         """Return the icon for the frontend."""
+        # Blood glucose target
         if self.key == "bGTarget":
             return GLUCOSE_VALUE_ICON
+
+        # Timestamp sensors
         if self._attr_device_class == SensorDeviceClass.TIMESTAMP:
-            if self.key == "bolusDeliveriedTime":
-                return TIMELINE_ICON
-            return CLOCK_ICON
+            return TIMELINE_ICON if self.key == "bolusDeliveriedTime" else CLOCK_ICON
+
+        # Pump sensors
         if self.device_type == DeviceType.PUMP:
             if self.key in ["basalSum", "basalRate"]:
                 return BASAL_ICON
@@ -254,8 +256,11 @@ class MedtrumEasyViewSensor(MedtrumEasyViewDevice, SensorEntity):
             if self.uom == "U":
                 return VOLUME_ICON
             return PUMP_ICON
+
+        # Sensor sensors
         if self.device_type == DeviceType.SENSOR:
             return SENSOR_ICON
+
         return None
 
     @property

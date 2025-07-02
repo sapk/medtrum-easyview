@@ -7,7 +7,7 @@ LOGGER: Logger = getLogger(__package__)
 
 NAME = "Medtrum EasyView"
 DOMAIN = "medtrum_easyview"
-VERSION = "0.0.0"
+VERSION = "1.0.0"
 ATTRIBUTION = "Data provided by https://easyview.medtrum.eu"
 LOGIN_URL = "/v3/api/v2.0/login"
 STATUS_URL = "/api/v2.1/monitor/$userid/status"
